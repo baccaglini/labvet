@@ -1,0 +1,93 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use app\models\Atendimento;
+
+/**
+ * AtendimentoSearch represents the model behind the search form about `app\models\Atendimento`.
+ */
+class AtendimentoSearch extends Atendimento
+{
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['id', 'sequencia', 'usuario'], 'integer'],
+            [['valor'], 'number'],
+            [['liberacao', 'proprietario', 'veterinario', 'clinica', 'exame', 'amostra', 'coleta', 'obs', 'cadastro'], 'safe'],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function scenarios()
+    {
+        // bypass scenarios() implementation in the parent class
+        return Model::scenarios();
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function search($params)
+    {
+        $query = Atendimento::find();
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+        
+        $query->joinWith('proprietario01');
+        $query->joinWith('proprietario0');
+        $query->joinWith('veterinario0');
+        $query->joinWith('clinica0');
+        $query->joinWith('exame01');
+        $query->joinWith('amostra01');
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'id' => $this->id,
+            //'proprietario' => $this->proprietario,
+            'sequencia' => $this->sequencia,
+            //'veterinario' => $this->veterinario,
+            //'clinica' => $this->clinica,
+            //'exame' => $this->exame,
+            //'amostra' => $this->amostra,
+            'valor' => $this->valor,
+            'liberacao' => $this->liberacao,
+            'usuario' => $this->usuario,
+            'cadastro' => $this->cadastro,
+        ]);
+
+        $query->andFilterWhere(['like', 'obs', $this->obs])
+                ->andFilterWhere(['like', 'proprietario.nome', $this->proprietario])
+                ->andFilterWhere(['like', 'proprietario.animal', $this->sequencia])
+                ->andFilterWhere(['like', 'veterinario.nome', $this->veterinario])
+                ->andFilterWhere(['like', 'clinica.nome', $this->clinica])
+                ->andFilterWhere(['like', 'exame.exame', $this->exame])
+                ->andFilterWhere(['like', 'amostra.amostra', $this->amostra]);
+
+        return $dataProvider;
+    }
+}

@@ -1,0 +1,145 @@
+<?php
+
+namespace app\models;
+
+use Yii;
+
+/**
+ * This is the model class for table "atendimento".
+ *
+ * @property integer $id
+ * @property integer $proprietario
+ * @property integer $sequencia
+ * @property integer $veterinario
+ * @property integer $clinica
+ * @property integer $exame
+ * @property integer $amostra
+ * @property double $valor
+ * @property string $liberacao
+ * @property string $obs
+ * @property integer $usuario
+ * @property string $cadastro
+ * @property integer $ativo
+ *
+ * @property Clinica $clinica0
+ * @property ExameAmostra $exame0
+ * @property ProprietarioAnimal $proprietario0
+ * @property Administrador $usuario0
+ * @property Veterinario $veterinario0
+ */
+class Atendimento extends \yii\db\ActiveRecord
+{
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'atendimento';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['proprietario', 'sequencia', 'veterinario', 'exame', 'amostra', 'coleta', 'valor', 'usuario', 'cadastro'], 'required'],
+            [['proprietario', 'sequencia', 'veterinario', 'clinica', 'exame', 'amostra', 'usuario', 'ativo'], 'integer'],
+            [['valor'], 'number'],
+            [['liberacao', 'cadastro'], 'safe'],
+            [['obs'], 'string'],
+            [['clinica'], 'exist', 'skipOnError' => true, 'targetClass' => Clinica::className(), 'targetAttribute' => ['clinica' => 'id']],
+            [['exame', 'amostra'], 'exist', 'skipOnError' => true, 'targetClass' => ExameAmostra::className(), 'targetAttribute' => ['exame' => 'exame', 'amostra' => 'amostra']],
+            [['proprietario', 'sequencia'], 'exist', 'skipOnError' => true, 'targetClass' => ProprietarioAnimal::className(), 'targetAttribute' => ['proprietario' => 'proprietario', 'sequencia' => 'sequencia']],
+            [['usuario'], 'exist', 'skipOnError' => true, 'targetClass' => Administrador::className(), 'targetAttribute' => ['usuario' => 'id']],
+            [['veterinario'], 'exist', 'skipOnError' => true, 'targetClass' => Veterinario::className(), 'targetAttribute' => ['veterinario' => 'id']],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'proprietario' => 'Proprietario',
+            'sequencia' => 'Sequencia',
+            'veterinario' => 'Veterinario',
+            'clinica' => 'Clinica',
+            'exame' => 'Exame',
+            'coleta' => 'Tipo Coleta',
+            'amostra' => 'Amostra',
+            'valor' => 'Valor',
+            'liberacao' => 'Liberacao',
+            'obs' => 'Obs',
+            'usuario' => 'Usuario',
+            'cadastro' => 'Cadastro',
+            'ativo' => 'Ativo',
+        ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getClinica0()
+    {
+        return $this->hasOne(Clinica::className(), ['id' => 'clinica']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getExame0()
+    {
+        return $this->hasOne(ExameAmostra::className(), ['exame' => 'exame', 'amostra' => 'amostra']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProprietario0()
+    {
+        return $this->hasOne(ProprietarioAnimal::className(), ['proprietario' => 'proprietario', 'sequencia' => 'sequencia']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUsuario0()
+    {
+        return $this->hasOne(Administrador::className(), ['id' => 'usuario']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVeterinario0()
+    {
+        return $this->hasOne(Veterinario::className(), ['id' => 'veterinario']);
+    }
+    
+    public function getExame01()
+    {
+        return $this->hasOne(Exame::className(), ['id' => 'exame']);
+    }
+    
+    public function getAmostra01()
+    {
+        return $this->hasOne(Amostra::className(), ['id' => 'amostra']);
+    }
+    
+    public function getProprietario01()
+    {
+        return $this->hasOne(Proprietario::className(), ['id' => 'proprietario']);
+    }
+
+    /**
+     * @inheritdoc
+     * @return AtendimentoQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new AtendimentoQuery(get_called_class());
+    }
+}
