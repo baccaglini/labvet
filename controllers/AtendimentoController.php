@@ -169,13 +169,15 @@ class AtendimentoController extends Controller {
                 ->innerJoin('amostra', 'amostra.id = exame_amostra.amostra')
                 ->where(['atendimento_exame.atendimento' => $id])
                 ->orderBy('exame.exame');
+        
         $command = $query->createCommand();
+        
         $modelsAtendimentoExame = $command->queryAll();
-
+        
         /** VERIFICA QUAIS EXAMES ESTÃO NO BD */
         $arrExamesBd = array();
         foreach ($modelsAtendimentoExame as $value) {
-            $arrExamesBd[] = $value->idExame;
+            $arrExamesBd[] = $value['idExame'];
         }
 
 
