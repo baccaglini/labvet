@@ -1,6 +1,7 @@
 <?php
 
 use app\models\Estado;
+use app\models\Cidade;
 use app\models\Proprietario;
 use app\models\ProprietarioEndereco;
 use kartik\depdrop\DepDrop;
@@ -16,6 +17,16 @@ use yii\widgets\MaskedInput;
 /* @var $model Proprietario */
 /* @var $modelEndereco ProprietarioEndereco */
 /* @var $form ActiveForm */
+
+$dataCidade = array();
+if (!$model->isNewRecord) {
+    $dataCidade = ArrayHelper::map(Cidade::find()
+                            ->where(['idEstado' => $modelEndereco->uf])
+                            ->orderBy([
+                                'prioridade' => SORT_DESC, 
+                                'nmCidades' => SORT_ASC,
+                                ])->all(), 'id', 'nmCidades');
+}
 ?>
 
 <div class="proprietario-form">
@@ -71,6 +82,7 @@ use yii\widgets\MaskedInput;
                 <div class="col-md-8">
                     <?=
                     $form->field($modelEndereco, 'cidade')->widget(DepDrop::classname(), [
+                        'data' => $dataCidade,
                         'pluginOptions' => [
                             'depends' => ['proprietarioendereco-uf'],
                             'placeholder' => '-- selecione a cidade',

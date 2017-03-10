@@ -107,20 +107,22 @@ class AtendimentoController extends Controller {
                     throw new Exception('Erro ao cadastrar atendimento.');
                 }
 
-                foreach ($post['arrExame'] as $key => $value) {
-                    $modelAtendimentoExame = new AtendimentoExame();
-                    $modelAtendimentoExame->atendimento = $model->id;
-                    $modelAtendimentoExame->exame = $value;
-                    $modelAtendimentoExame->amostra = $post['arrAmostra'][$key];
-                    $modelAtendimentoExame->coleta = $post['arrColeta'][$key];
-                    $modelAtendimentoExame->valor = $post['arrValor'][$key];
-                    $modelAtendimentoExame->liberacao = null;
-                    $modelAtendimentoExame->obs = $post['arrObj'][$key];
-                    $modelAtendimentoExame->usuario = Yii::$app->user->getId();
-                    $modelAtendimentoExame->cadastro = date('Y-m-d H:i:s');
-                    $modelAtendimentoExame->ativo = 1;
-                    if (!($modelAtendimentoExame->save())) {
-                        throw new Exception('Erro ao cadastrar lista de exames.');
+                if (isset($post['arrExame'])) {
+                    foreach ($post['arrExame'] as $key => $value) {
+                        $modelAtendimentoExame = new AtendimentoExame();
+                        $modelAtendimentoExame->atendimento = $model->id;
+                        $modelAtendimentoExame->exame = $value;
+                        $modelAtendimentoExame->amostra = $post['arrAmostra'][$key];
+                        $modelAtendimentoExame->coleta = $post['arrColeta'][$key];
+                        $modelAtendimentoExame->valor = $post['arrValor'][$key];
+                        $modelAtendimentoExame->liberacao = null;
+                        $modelAtendimentoExame->obs = $post['arrObj'][$key];
+                        $modelAtendimentoExame->usuario = Yii::$app->user->getId();
+                        $modelAtendimentoExame->cadastro = date('Y-m-d H:i:s');
+                        $modelAtendimentoExame->ativo = 1;
+                        if (!($modelAtendimentoExame->save())) {
+                            throw new Exception('Erro ao cadastrar lista de exames.');
+                        }
                     }
                 }
 
@@ -175,9 +177,8 @@ class AtendimentoController extends Controller {
         /** VERIFICA QUAIS EXAMES ESTÃO NO BD */
         $arrExamesBd = array();
         foreach ($modelsAtendimentoExame as $value) {
-            $arrExamesBd[] = $value->idExame;
+            $arrExamesBd[] = $value['idExame'];
         }
-
 
         /*         * ******************************** */
         $msg = '';
@@ -204,17 +205,18 @@ class AtendimentoController extends Controller {
                     throw new Exception('Erro ao cadastrar atendimento.');
                 }
 
-                foreach ($post['arrExame'] as $key => $value) {
-                    $modelAtendimentoExame = new AtendimentoExame();
+                if (isset($post['arrExame'])) {
+                    foreach ($post['arrExame'] as $key => $value) {
+                        $modelAtendimentoExame = new AtendimentoExame();
 
-                    $arrExamesBd;
-                    if (!in_array($value, $arrExamesBd)) {
-                        /* NÃO ESTA NO BANCO, OU SEJA, É EXAME NOVO */
-                        $modelAtendimentoExame->atendimento = $model->id;
-                        $modelAtendimentoExame->exame = $value;
-                    } else {
-                        /* JÁ ESTA CADASTRADO NO BANCO, OU SEJA, É ATUALIZAÇÃO */
-                        $modelAtendimentoExame = AtendimentoExame::findOne(['atendimento' => $model->id, 'exame' => $value]);
+                        if (!in_array($value, $arrExamesBd)) {
+                            /* NÃO ESTA NO BANCO, OU SEJA, É EXAME NOVO */
+                            $modelAtendimentoExame->atendimento = $model->id;
+                            $modelAtendimentoExame->exame = $value;
+                        } else {
+                            /* JÁ ESTA CADASTRADO NO BANCO, OU SEJA, É ATUALIZAÇÃO */
+                            $modelAtendimentoExame = AtendimentoExame::findOne(['atendimento' => $model->id, 'exame' => $value]);
+                        }
 
                         $modelAtendimentoExame->amostra = $post['arrAmostra'][$key];
                         $modelAtendimentoExame->coleta = $post['arrColeta'][$key];
@@ -232,19 +234,21 @@ class AtendimentoController extends Controller {
                         $modelAtendimentoExame->usuario = Yii::$app->user->getId();
                         $modelAtendimentoExame->cadastro = date('Y-m-d H:i:s');
                         $modelAtendimentoExame->ativo = 1;
-                    }
 
-                    if (!in_array($value, $arrExamesBd)) {
-                        if (!($modelAtendimentoExame->save())) {
-                            throw new Exception('Erro ao cadastrar lista de exames.');
+                        if (!in_array($value, $arrExamesBd)) {
+                            /* NÃO ESTA NO BANCO, OU SEJA, É EXAME NOVO */
+                            if (!($modelAtendimentoExame->save())) {
+                                throw new Exception('*Erro ao cadastrar lista de exames. ' . $value);
+                            }
+                        } else {
+                            /* JÁ ESTA CADASTRADO NO BANCO, OU SEJA, É ATUALIZAÇÃO */
+                            if (!($modelAtendimentoExame->update())) {
+                                throw new Exception('Erro ao atualzar lista de exames.');
+                            }
                         }
-                    } else {
-                        if (!($modelAtendimentoExame->update())) {
-                            throw new Exception('Erro ao cadastrar lista de exames.');
-                        }
-                    }
 
-                    unset($modelAtendimentoExame);
+                        unset($modelAtendimentoExame);
+                    }
                 }
 
                 $transacao->commit();
@@ -288,25 +292,8 @@ class AtendimentoController extends Controller {
      */
     public function actionDelete($id) {
         $this->findModel($id)->delete();
+
         return $this->redirect(['index']);
-    }
-
-    /*
-     * Gráficos de atendimento...
-     */
-
-    public function actionGraficos() {
-        $searchModel = new AtendimentoSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
-        $resp = $this->dadosGraficoAtentimentoEspecie();
-        $porMes = $this->dadosAtendimentosMes();
-
-        return $this->render('graficos', [
-                    'searchModel' => $searchModel,
-                    'resp' => $resp,
-                    'porMes' => $porMes,
-        ]);
     }
 
     /**
@@ -322,29 +309,6 @@ class AtendimentoController extends Controller {
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
-    }
-
-    private function dadosGraficoAtentimentoEspecie() {
-        $query = new Query;
-        $query->select('especie.especie, count(especie.id) as qtd')
-                ->from('atendimento')
-                ->innerJoin('proprietario_animal', 'proprietario_animal.proprietario = atendimento.proprietario and proprietario_animal.sequencia = atendimento.sequencia')
-                ->innerJoin('raca', 'raca.id = proprietario_animal.raca')
-                ->innerJoin('especie', 'especie.id = raca.especie')
-                ->where('atendimento.ativo = 1')
-                ->groupBy('especie.id')
-                ->all();
-        return $query->all();
-    }
-
-    private function dadosAtendimentosMes() {
-        $query = new Query;
-        $query->select('month(atendimento.cadastro) as mes, year(atendimento.cadastro) as ano, count(atendimento.id) as qtd')
-                ->from('atendimento')
-                ->where('date(atendimento.cadastro) between date(DATE_SUB(now(), INTERVAL 12 month)) and date(now()) and atendimento.ativo = 1')
-                ->groupBy('month(atendimento.cadastro), year(atendimento.cadastro)')
-                ->all();
-        return $query->all();
     }
 
 }

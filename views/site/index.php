@@ -14,7 +14,7 @@ foreach ($resp as $value) {
 
     <div class="jumbotron">
         <h1>LabVet!</h1>
-        <!--p class="lead">texto texto texto texto texto texto</p-->
+        <p class="lead">texto texto texto texto texto texto</p>
     </div>
 
     <div class="body-content">

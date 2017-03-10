@@ -9,7 +9,6 @@ use app\models\ProprietarioEmail;
 use app\models\ProprietarioEndereco;
 use app\models\ProprietarioFone;
 use app\models\ProprietarioSearch;
-use app\models\VeterinarioFone;
 use Yii;
 use yii\db\Exception;
 use yii\filters\VerbFilter;
@@ -97,17 +96,26 @@ class ProprietarioController extends Controller {
                 /** SALVA OS DADOS DE PROPRIETÁRIO */
                 $model->load($post);
                 $model->ativo = 1;
+
                 $model->cpf = preg_replace('/[^0-9]/', '', $model->cpf);
+
+                if ($model->cpf === '') {
+                    $model->cpf = null;
+                }
+
                 if (!$model->save()) {
                     throw new Exception('Erro ao salvar dados de Proprietário.');
                 }
 
                 /** SALVA OS DADOS DE ENDEREÇO */
                 $modelEndereco->load($post);
-                $modelEndereco->proprietario = $model->id;
-                $modelEndereco->ativo = 1;
-                if (!$modelEndereco->save()) {
-                    throw new Exception('Erro ao salvar dados de Proprietário.');
+                if ($modelEndereco->uf !== '') {
+                    /* ...SE TIVER VALOR PRA SALVAR */
+                    $modelEndereco->proprietario = $model->id;
+                    $modelEndereco->ativo = 1;
+                    if (!$modelEndereco->save()) {
+                        throw new Exception('Erro ao salvar dados de Proprietário.');
+                    }
                 }
 
                 /** SALVA OS DADOS DE EMAIL */
@@ -118,9 +126,12 @@ class ProprietarioController extends Controller {
                         $modelEmail->proprietario = $model->id;
                         $modelEmail->sequencia = $aux;
                         $modelEmail->ativo = 1;
-                        $aux++;
-                        if (!($modelEmail->save())) {
-                            throw new Exception('Erro ao cadastrar E-mail.');
+
+                        if ($modelEmail->email !== '') {
+                            $aux++;
+                            if (!($modelEmail->save())) {
+                                throw new Exception('Erro ao cadastrar E-mail.');
+                            }
                         }
                     }
                 } else {
@@ -135,9 +146,11 @@ class ProprietarioController extends Controller {
                         $modelFone->proprietario = $model->id;
                         $modelFone->sequencia = $aux;
                         $modelFone->ativo = 1;
-                        $aux++;
-                        if (!($modelFone->save())) {
-                            throw new Exception('Erro ao cadastrar E-mail.');
+                        if ($modelFone->fone !== '') {
+                            $aux++;
+                            if (!($modelFone->save())) {
+                                throw new Exception('Erro ao cadastrar E-mail.');
+                            }
                         }
                     }
                 } else {
@@ -178,6 +191,14 @@ class ProprietarioController extends Controller {
         $modelsAnimal = ProprietarioAnimal::findAll(['proprietario' => $id, 'ativo' => 1]);
         $msg = '';
 
+        if (count($modelsEmail) == 0) {
+            $modelsEmail = [new ProprietarioEmail()];
+        }
+
+        if (count($modelsFone) == 0) {
+            $modelsFone = [new ProprietarioFone()];
+        }
+
         $post = Yii::$app->request->post();
 
         if ($post) {
@@ -187,14 +208,23 @@ class ProprietarioController extends Controller {
                 /** SALVA OS DADOS DE PROPRIETÁRIO */
                 $model->load($post);
                 $model->ativo = 1;
+
+                $model->cpf = preg_replace('/[^0-9]/', '', $model->cpf);
+
+                if ($model->cpf === '') {
+                    $model->cpf = null;
+                }
+
                 if (!$model->save()) {
                     throw new Exception('Erro ao salvar dados de Veterinário.');
                 }
 
                 /** SALVA OS DADOS DE ENDEREÇO */
                 $modelEndereco->load($post);
-                if (!$modelEndereco->save()) {
-                    throw new Exception('Erro ao salvar dados de Endereço.');
+                if ($modelEndereco->uf !== '') {
+                    if (!$modelEndereco->save()) {
+                        throw new Exception('Erro ao salvar dados de Endereço.');
+                    }
                 }
 
                 /** SALVA OS DADOS DE EMAIL */
@@ -206,9 +236,12 @@ class ProprietarioController extends Controller {
                         $modelEmail->proprietario = $model->id;
                         $modelEmail->sequencia = $aux;
                         $modelEmail->ativo = 1;
-                        $aux++;
-                        if (!($modelEmail->save())) {
-                            throw new Exception('Erro ao cadastrar E-mail.');
+
+                        if ($modelEmail->email !== '') {
+                            $aux++;
+                            if (!($modelEmail->save())) {
+                                throw new Exception('Erro ao cadastrar E-mail.');
+                            }
                         }
                     }
                 } else {
@@ -224,9 +257,12 @@ class ProprietarioController extends Controller {
                         $modelFone->proprietario = $model->id;
                         $modelFone->sequencia = $aux;
                         $modelFone->ativo = 1;
-                        $aux++;
-                        if (!($modelFone->save())) {
-                            throw new Exception('Erro ao cadastrar E-mail.');
+
+                        if ($modelFone->fone !== '') {
+                            $aux++;
+                            if (!($modelFone->save())) {
+                                throw new Exception('Erro ao cadastrar E-mail.');
+                            }
                         }
                     }
                 } else {

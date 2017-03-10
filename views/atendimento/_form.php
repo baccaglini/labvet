@@ -24,6 +24,10 @@ use kartik\date\DatePicker;
 $dataAnimal = array();
 $dataClinica = array();
 $dataAmostra = array();
+
+$arrExamesCadastrados = Array();
+$arrExamesCadastrados[] = 0;
+
 if (!$model->isNewRecord) {
     $dataAnimal = ArrayHelper::map(ProprietarioAnimal::find()
                             ->where(['proprietario' => $model->proprietario])
@@ -35,8 +39,13 @@ if (!$model->isNewRecord) {
                             ->where(['veterinario_clinica.veterinario' => $model->veterinario])
                             ->orderBy('clinica.nome')
                             ->all(), 'id', 'nome');
-}
 
+    if (count($modelsAtendimentoExame) > 0) {
+        foreach ($modelsAtendimentoExame as $key => $value) {
+            $arrExamesCadastrados[] = $value['idExame'];
+        }
+    }
+}
 
 $modelsExameAmostra = [new ExameAmostra()];
 
@@ -97,7 +106,7 @@ $modelAtendimentoExame = new app\models\AtendimentoExame();
                 <div class="col-md-6">
                     <?=
                     $form->field($model, 'veterinario')->widget(Select2::classname(), [
-                        'data' => ArrayHelper::map(Veterinario::find()->where(['ativo' => '1'])->all(), 'id', 'nome', 'crmv'),
+                        'data' => ArrayHelper::map(Veterinario::find()->all(), 'id', 'nome', 'crmv'),
                         'language' => 'pt-BR',
                         'options' => ['placeholder' => 'Select o veter ...'],
                         'pluginOptions' => [
@@ -135,7 +144,7 @@ $modelAtendimentoExame = new app\models\AtendimentoExame();
                 <div class="col-md-4">
                     <?=
                     $form->field($modelAtendimentoExame, "exame")->widget(Select2::classname(), [
-                        'data' => ArrayHelper::map(Exame::find()->all(), 'id', 'exame'),
+                        'data' => ArrayHelper::map(Exame::find()->where(['not in', 'id', $arrExamesCadastrados])->all(), 'id', 'exame'),
                         'language' => 'pt-BR',
                         'options' => ['placeholder' => 'Select o exame ...'],
                         'pluginOptions' => [
@@ -225,9 +234,9 @@ $modelAtendimentoExame = new app\models\AtendimentoExame();
                                             <?php
                                             echo DatePicker::widget([
                                                 'name' => 'arrLiberacao[]',
-                                                'value' => $value['liberacao'],
-                                                    //'language' => 'ru',
-                                                    //'dateFormat' => 'yyyy-MM-dd',
+                                                'value' => (is_null($value['liberacao'])) ? '' : Yii::$app->formatter->asDate($value['liberacao'], 'php:d/m/Y'),
+                                                'language' => 'pt-BR',
+                                                    //'dateFormat' => 'dd/MM/yyyy',
                                             ]);
                                             ?>
                                         </td>

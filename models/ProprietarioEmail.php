@@ -31,7 +31,7 @@ class ProprietarioEmail extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['proprietario', 'sequencia', 'email'], 'required'],
+            //[['proprietario', 'sequencia', 'email'], 'required'],
             [['proprietario', 'sequencia', 'principal', 'ativo'], 'integer'],
             [['email'], 'string', 'max' => 255],
             [['proprietario'], 'exist', 'skipOnError' => true, 'targetClass' => Proprietario::className(), 'targetAttribute' => ['proprietario' => 'id']],
