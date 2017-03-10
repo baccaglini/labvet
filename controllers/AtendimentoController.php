@@ -70,8 +70,37 @@ class AtendimentoController extends Controller {
      * @return mixed
      */
     public function actionView($id) {
+        
+        $model = $this->findModel($id);
+        $modelsAtendimentoExame = [new AtendimentoExame()];
+        /** busca os exames do atendimento */
+        $query = new Query;
+        $query->select([
+                    'atendimento_exame.atendimento',
+                    'atendimento_exame.coleta',
+                    'atendimento_exame.valor',
+                    'atendimento_exame.liberacao',
+                    'atendimento_exame.obs',
+                    'exame_amostra.exame as idExame',
+                    'exame_amostra.amostra as idAmostra',
+                    'exame.exame',
+                    'amostra.amostra',
+                    'atendimento_exame.laudo'
+                ])
+                ->from('atendimento_exame')
+                ->innerJoin('exame_amostra', 'exame_amostra.exame = atendimento_exame.exame and exame_amostra.amostra = atendimento_exame.amostra')
+                ->innerJoin('exame', 'exame.id = exame_amostra.exame')
+                ->innerJoin('amostra', 'amostra.id = exame_amostra.amostra')
+                ->where(['atendimento_exame.atendimento' => $id])
+                ->orderBy('exame.exame');
+        
+        $command = $query->createCommand();
+        
+        $modelsAtendimentoExame = $command->queryAll();
+        
         return $this->render('view', [
-                    'model' => $this->findModel($id),
+            'model' => $model,
+            'modelsAtendimentoExame' => $modelsAtendimentoExame        
         ]);
     }
 
@@ -171,9 +200,11 @@ class AtendimentoController extends Controller {
                 ->innerJoin('amostra', 'amostra.id = exame_amostra.amostra')
                 ->where(['atendimento_exame.atendimento' => $id])
                 ->orderBy('exame.exame');
+        
         $command = $query->createCommand();
+        
         $modelsAtendimentoExame = $command->queryAll();
-
+        
         /** VERIFICA QUAIS EXAMES ESTÃO NO BD */
         $arrExamesBd = array();
         foreach ($modelsAtendimentoExame as $value) {
@@ -291,8 +322,21 @@ class AtendimentoController extends Controller {
      * @return mixed
      */
     public function actionDelete($id) {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $model->ativo = 0;
+        if (!$model->save()) {
+            throw new Exception('Erro ao cadastrar atendimento.');
+        }
+        return $this->redirect(['index']);
+    }
 
+    /*
+     * Gráficos de atendimento...
+     */
+
+    public function actionGraficos() {
+        $searchModel = new AtendimentoSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         return $this->redirect(['index']);
     }
 

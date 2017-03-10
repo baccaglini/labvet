@@ -20,7 +20,7 @@ class AtendimentoExameSearch extends AtendimentoExame
         return [
             [['atendimento', 'exame', 'amostra', 'usuario', 'ativo'], 'integer'],
             [['coleta', 'liberacao', 'obs', 'cadastro'], 'safe'],
-            [['valor'], 'number'],
+            [['valor', 'laudo'], 'number'],
         ];
     }
 
@@ -68,6 +68,7 @@ class AtendimentoExameSearch extends AtendimentoExame
             'usuario' => $this->usuario,
             'cadastro' => $this->cadastro,
             'ativo' => $this->ativo,
+            'laudo' => $this->laudo,
         ]);
 
         $query->andFilterWhere(['like', 'coleta', $this->coleta])

@@ -17,6 +17,7 @@ use Yii;
  * @property integer $usuario
  * @property string $cadastro
  * @property integer $ativo
+ * @property integer $laudo
  *
  * @property Atendimento $atendimento0
  * @property ExameAmostra $exame0
@@ -66,6 +67,7 @@ class AtendimentoExame extends \yii\db\ActiveRecord
             'usuario' => 'Usuario',
             'cadastro' => 'Cadastro',
             'ativo' => 'Ativo',
+            'laudo' => 'Cod. Laudo',
         ];
     }
 
