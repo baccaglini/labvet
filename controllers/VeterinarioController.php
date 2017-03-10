@@ -266,17 +266,15 @@ class VeterinarioController extends Controller {
                 foreach ($modelsClinica as $value) {
                     $arrClinicaBd[] = $value->clinica;
                 }
-                
+
                 /** INATIVA AS CLINICAS QUE ESTÃO EM BD MAS NÃO ESTÃO NO POST */
                 foreach ($arrClinicaBd as $valueBd) {
                     $auxVeterinarioClinica = new VeterinarioClinica();
                     if (!in_array($valueBd, $arrClinicaPost)) {
-                        $auxVeterinarioClinica = $auxVeterinarioClinica->findOne(['clinica' => $valueBd, 'veterinario' => $id]);
-                        if ($auxVeterinarioClinica->ativo !== 0) {
-                            $auxVeterinarioClinica->ativo = 0;
-                            if (!$auxVeterinarioClinica->update()) {
-                                throw new Exception('01 - Erro ao relacionar com clinica.');
-                            }
+                        $auxVeterinarioClinica = VeterinarioClinica::findOne(['veterinario' => $id, 'clinica' => $valueBd]);
+                        $auxVeterinarioClinica->ativo = 0;
+                        if (!$auxVeterinarioClinica->update(['ativo' => 0])) {
+                            throw new Exception('01 - Erro ao relacionar com clinica.');
                         }
                     }
                     unset($auxVeterinarioClinica);

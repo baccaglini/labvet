@@ -31,7 +31,7 @@ class ProprietarioFone extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['proprietario', 'sequencia', 'fone'], 'required'],
+            //[['proprietario', 'sequencia', 'fone'], 'required'],
             [['proprietario', 'sequencia', 'ativo'], 'integer'],
             [['obs'], 'string'],
             [['fone'], 'string', 'max' => 45],

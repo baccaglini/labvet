@@ -26,10 +26,10 @@ AppAsset::register($this);
         <div class="wrap">
             <?php
             NavBar::begin([
-                'brandLabel' => Html::img('@web/images/logo_vertical.jpg', ['alt'=>Yii::$app->name]), //'**LabVet',
+                'brandLabel' => 'LabVet',
                 'brandUrl' => Yii::$app->homeUrl,
                 'options' => [
-                    'class' => 'navbar navbar-fixed-top',
+                    'class' => 'navbar-inverse navbar-fixed-top',
                 ],
             ]);
             echo Nav::widget([

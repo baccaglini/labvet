@@ -36,7 +36,7 @@ class ProprietarioEndereco extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['proprietario', 'cep', 'cidade', 'uf', 'logradouro', 'numero', 'bairro'], 'required'],
+            [['proprietario'], 'required'],
             [['proprietario', 'cidade', 'uf', 'ativo'], 'integer'],
             [['cep'], 'string', 'max' => 11],
             [['logradouro', 'bairro'], 'string', 'max' => 255],
